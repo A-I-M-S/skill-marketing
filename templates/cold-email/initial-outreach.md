@@ -16,9 +16,9 @@ We recently helped a {{REFERENCE_INDUSTRY}} company in Singapore {{REFERENCE_RES
 
 A quick snapshot of what we do:
 
-- **AI process audits** — identify automation opportunities in your existing workflows.
-- **Implementation & training** — we build, deploy, and upskill your team.
-- **Grant navigation** — we help you apply for PSG / EDG co-funding (up to 50%).
+- **Agentic workflow audits** — map out manual processes suitable for autonomous AI agent workers.
+- **Multi-agent deployment** — we design, build, and deploy custom agentic solutions.
+- **Grant navigation** — we assist with EDG and PSG applications (covering up to 50–70% of costs).
 
 Would you be open to a 15-minute call next week to see if there is a fit?
 

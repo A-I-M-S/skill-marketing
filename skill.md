@@ -1,12 +1,12 @@
 ---
 name: skill-marketing
-description: 3-layer organic growth engine for AI transformation consultancies targeting Singapore SMEs. Builds lead-capture funnels, visibility channels (LinkedIn, cold email, SEO, PR, directories), and AI-discoverability (AEO/GEO, SoM tracking) with $0 ad spend.
+description: 3-layer organic growth engine for aims-sg.com (Agentic Business Transformation consultancy targeting Singapore SMEs/enterprises). Builds lead-capture funnels, visibility channels, and AI-discoverability (AEO/GEO) with $0 ad spend.
 mode: auto
 ---
 
 # skill-marketing
 
-A **3-layer organic growth engine** for AI transformation consultancies targeting Singapore SMEs and enterprises. Builds and runs the full marketing stack from the plan in `marketing.md` with $0 ad spend.
+A **3-layer organic growth engine** for aims-sg.com (Agentic Business Transformation targeting Singapore SMEs and enterprises). Builds and runs the full marketing stack from the plan in `marketing.md` with $0 ad spend.
 
 ## Layers
 

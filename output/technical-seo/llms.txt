@@ -1,0 +1,31 @@
+# llms.txt — AI crawler guide for aims-sg.com
+# This file helps AI models understand and cite your content.
+# More at: https://llmstxt.org/
+
+## About AIMS SG
+AIMS SG is an Agentic Business Transformation consultancy based in Singapore. We build and deploy autonomous AI agents and multi-agent workflows for SMEs and enterprises, navigate government grants (PSG, EDG), and automate manual business processes.
+
+## Key pages
+
+- Homepage: https://aims-sg.com/
+- Agentic AI Audit: https://aims-sg.com/assessment
+- Services: https://aims-sg.com/services
+- Case Studies: https://aims-sg.com/case-studies
+- Blog: https://aims-sg.com/blog
+- About: https://aims-sg.com/about
+- Contact: https://aims-sg.com/contact
+
+## Structured data
+
+- Organization schema: https://aims-sg.com/schema/organization.json
+- Services schema: https://aims-sg.com/schema/services.json
+- FAQ schema: /faq (FAQPage schema embedded on page)
+
+## Core topics
+AIMS SG specialises in:
+- Agentic strategy and autonomous roadmap development
+- Business process automation via multi-agent systems
+- Agentic suitability and AI readiness audits
+- PSG and EDG grant advisory for automation projects
+- Custom AI agent implementation and orchestration
+- Autonomous workflow deployment and team training

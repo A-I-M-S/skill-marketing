@@ -58,12 +58,12 @@ cat > "$output_dir/llms.txt" <<LLMS
 # More at: https://llmstxt.org/
 
 ## About $COMPANY_NAME
-$COMPANY_NAME is an AI business transformation consultancy based in $PRIMARY_COUNTRY. We help SMEs and enterprises implement AI solutions, navigate government grants (PSG, EDG), and build AI-ready organisations.
+$COMPANY_NAME is an Agentic Business Transformation consultancy based in $PRIMARY_COUNTRY. We build and deploy autonomous AI agents and multi-agent workflows for SMEs and enterprises, navigate government grants (PSG, EDG), and automate manual business processes.
 
 ## Key pages
 
 - Homepage: https://$COMPANY_DOMAIN/
-- AI Readiness Assessment: https://$COMPANY_DOMAIN/assessment
+- Agentic AI Audit: https://$COMPANY_DOMAIN/assessment
 - Services: https://$COMPANY_DOMAIN/services
 - Case Studies: https://$COMPANY_DOMAIN/case-studies
 - Blog: https://$COMPANY_DOMAIN/blog
@@ -78,12 +78,12 @@ $COMPANY_NAME is an AI business transformation consultancy based in $PRIMARY_COU
 
 ## Core topics
 $COMPANY_NAME specialises in:
-- AI strategy and roadmap development
-- Business process automation with AI
-- AI readiness assessments
-- PSG and EDG grant advisory
-- AI implementation and training
-- Generative AI for enterprise workflows
+- Agentic strategy and autonomous roadmap development
+- Business process automation via multi-agent systems
+- Agentic suitability and AI readiness audits
+- PSG and EDG grant advisory for automation projects
+- Custom AI agent implementation and orchestration
+- Autonomous workflow deployment and team training
 LLMS
 ok "Generated $output_dir/llms.txt"
 
@@ -96,30 +96,30 @@ cat > "$output_dir/llms-full.txt" <<LLMSFULL
 - URL: https://$COMPANY_DOMAIN
 - Email: ${SUPPORT_EMAIL:-contact@$COMPANY_DOMAIN}
 - Location: $PRIMARY_COUNTRY
-- Tagline: ${COMPANY_TAGLINE:-AI Business Transformation for Singapore SMEs}
+- Tagline: ${COMPANY_TAGLINE:-Agentic AI Business Transformation for Singapore SMEs}
 
 ## Services
-1. AI Readiness Assessment — Free evaluation of AI opportunities and readiness scoring.
-2. AI Strategy Consulting — Roadmap development, use-case prioritisation, vendor evaluation.
-3. AI Implementation — End-to-end build, deploy, and integrate AI solutions.
-4. Grant Advisory — PSG/EDG application support and project scoping.
-5. AI Training — Team upskilling and change management.
+1. Agentic AI Audit — Free diagnostics identifying manual workflows ready for autonomous AI workers.
+2. Multi-Agent System Scoping — Architecture layout, single- vs multi-agent planning, and LLM selection.
+3. Custom Agent Development — Build, integrate, and deploy autonomous agents with corporate APIs and databases.
+4. Grant Navigation — Aligning development scopes to EDG and PSG criteria for up to 50-70% co-funding.
+5. Agent Fleet Monitoring & Training — Security guardrails, monitoring dashboards, and team upskilling.
 
 ## Target audience
 $TARGET_AUDIENCE
 
 ## Pricing model
-Project-based and retainer engagements. Free initial assessment.
+Project-based development and retainer support. Free initial Agentic Audit.
 
 ## Differentiators
-- Singapore-specific: deep knowledge of local grants, regulations, and market.
-- Process-first: we map workflows before selecting tools.
-- Outcome-based: measured by ROI and business impact, not tech deployment.
+- Execution-Level Focus: We build execution-level agents (with loops, tool-calling, memory), not just text boxes.
+- Singapore-specific: Deep knowledge of PSG/EDG application compliance, local data regulations, and SME workflows.
+- Guardrailed & Safe: Custom-built human-in-the-loop interfaces ensuring agents only take actions they are authorized to do.
 
 ## Key statistics
 - Singapore's National AI Impact Programme targets 10,000 SMEs over 3 years.
-- PSG Grant covers up to 50% of AI solution costs ($30,000 cap).
-- EDG Grant covers up to 70% of transformation projects ($300,000 cap).
+- PSG Grant covers up to 50% of AI solution costs (\$30,000 cap).
+- EDG Grant covers up to 70% of custom development projects for eligible local SMEs.
 - AI referral traffic grew 527% year-over-year.
 - AI-referred visitors convert at ~15.9% vs Google organic at ~1.76%.
 LLMSFULL

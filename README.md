@@ -1,8 +1,8 @@
 # skill-marketing
 
-**3-layer organic growth engine** for AI transformation consultancies targeting Singapore SMEs. $0 ad spend.
+**3-layer organic growth engine** for **aims-sg.com** — an Agentic Business Transformation consultancy targeting Singapore SMEs and enterprises. $0 ad spend.
 
-Built from the strategy in `marketing.md` — a comprehensive playbook covering lead capture, visibility channels (LinkedIn, cold email, SEO, directories, PR, communities), and AI-discoverability (AEO/GEO, Share of Model tracking).
+This repository implements the strategy from [marketing.md](file:///home/openclaw/skill-marketing/marketing.md) (Track B — AI/Agentic Transformation) to build lead-capture funnels, run outreach campaigns, generate thought leadership content, and optimize for AI-discoverability (AEO/GEO) using AI agents.
 
 ## Architecture
 
@@ -20,7 +20,7 @@ skill-marketing/
 │   ├── setup-technical-seo         # robots.txt, llms.txt, schema stub generator
 │   └── track-som                   # Share of Model tracking sheet creator
 ├── templates/                      # Markdown templates with {{VARIABLES}}
-│   ├── lead-assessment/            # AI Audit form + landing page sections
+│   ├── lead-assessment/            # Agentic AI Audit form + landing page sections
 │   ├── nurture/                    # 4-email automated nurture sequence
 │   ├── linkedin/                   # Mon/Wed/Fri LinkedIn post templates
 │   ├── cold-email/                 # 3-email outreach sequence
@@ -28,15 +28,15 @@ skill-marketing/
 │   ├── schema/                     # JSON-LD schemas (FAQPage, QAPage, ProfessionalService)
 │   └── directory-listings/         # Global + Singapore directory registries
 ├── checklists/                     # Executable markdown checklists
-│   ├── week1-sprint.md             # Days 1-7
+│   ├── week1-sprint.md             # Days 1-7 starting actions
 │   ├── 90-day-roadmap.md           # Full quarter plan (Months 1-3)
 │   ├── monthly-review.md           # Monthly KPI review template
 │   ├── technical-seo.md            # SSR, robots.txt, llms.txt, schema checklist
 │   ├── pr-outreach.md              # Journalists, HARO, press release targets
-│   └── directory-listings.md       # Not yet created
+│   └── directory-listings.md       # Directory listing priority checklist
 ├── config/                         # Reference data for content
-│   ├── keywords-track-b.md         # SEO keywords (Track B — AI Transformation)
-│   ├── persona-cto.md              # Buyer persona
+│   ├── keywords-track-b.md         # SEO keywords (Track B — Agentic AI Transformation)
+│   ├── persona-cto.md              # Buyer persona (SME/Enterprise CTOs)
 │   └── grants-reference.md         # Singapore grants (PSG, EDG, SFEC)
 └── logs/                           # Activity logs
 ```
@@ -46,18 +46,18 @@ skill-marketing/
 ```bash
 # 1. Configure
 cp .env.sample .env
-# Edit .env with your AI endpoint, API key, and company details
+# Edit .env with your AI endpoint, API key, and aims-sg.com company details
 
-# 2. Generate lead capture content
+# 2. Generate lead capture content (Agentic AI Audit)
 ./tools/generate-content templates/lead-assessment/landing-page-sections.md -o output/landing-page.md
 
-# 3. Set up technical SEO foundation
+# 3. Set up technical SEO/AEO/GEO foundation
 ./tools/setup-technical-seo -o output/technical-seo
 
-# 4. Generate LinkedIn posts
+# 4. Generate LinkedIn posts focusing on Agentic AI
 ./tools/generate-content templates/linkedin/monday-insight.md -o output/posts/monday-week1.md
 
-# 5. Prepare prospect list and generate outreach
+# 5. Prepare prospect list and generate outreach campaigns
 # Create prospects.csv, then:
 ./tools/generate-outreach prospects.csv -o output/campaign-w1
 
@@ -71,17 +71,21 @@ Add to your `opencode.json`:
 
 ```json
 {
-  "skills": ["file:///path/to/skill-marketing/skill.md"]
+  "skills": ["file:///home/openclaw/skill-marketing/skill.md"]
 }
 ```
 
 Then ask the agent:
 
 - "Run the marketing skill — I need my week 1 sprint"
-- "Generate this week's LinkedIn posts"
-- "Set up my technical SEO foundation"
+- "Generate this week's LinkedIn posts targeting SG CTOs"
+- "Set up my technical SEO and llms.txt files"
 - "Create a cold email campaign for these prospects"
-- "Track my Share of Model this week"
+- "Track my Share of Model (SoM) this week"
+
+## Target Positioning: Track B (Agentic Transformation)
+
+This repository is permanently configured for **Track B — AI/Agentic Transformation** targeting Singapore SME/enterprise decision-makers. The marketing goals focus on positioning aims-sg.com as the leading authority in deploying multi-agent architectures and autonomous workflow automation under Singapore government grants (EDG/PSG).
 
 ## Dependencies
 
@@ -90,7 +94,3 @@ Then ask the agent:
 - **AI endpoint** — optional, set via `AI_ENDPOINT` + `AI_API_KEY` in `.env`
 
 Everything else is template-based and works fully offline without API calls.
-
-## Track B
-
-This repo is configured for **Track B — AI Transformation** (Singapore SME/enterprise decision-makers). See `marketing.md` Section 9 for switching to Track A (Immigration & Relocation).

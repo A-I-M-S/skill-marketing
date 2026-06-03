@@ -1,6 +1,6 @@
-# AI Business Readiness Assessment
+# Agentic AI Opportunity Audit
 
-Thank you for your interest in **{{COMPANY_NAME}}**. Complete this 2-minute assessment to receive a personalised AI opportunity report tailored to your business.
+Thank you for your interest in **{{COMPANY_NAME}}**. Complete this 2-minute audit form to receive a custom report mapping out which business processes can be automated with AI agents.
 
 ---
 
@@ -14,59 +14,59 @@ Thank you for your interest in **{{COMPANY_NAME}}**. Complete this 2-minute asse
 
 **Job Title:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
-## Section 2 — About Your Company
+## Section 2 — Workflow Diagnostics
 
 **Company Name:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
 **Industry:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
-**Company Size:**
-- [ ] 1-10 employees
-- [ ] 11-50 employees
-- [ ] 51-200 employees
-- [ ] 201-500 employees
-- [ ] 500+ employees
-
-**Which best describes your current AI adoption stage?**
-- [ ] Exploring — researching what AI could do for us
-- [ ] Piloting — running a small trial or proof of concept
-- [ ] Scaling — implementing AI in one or more departments
-- [ ] Optimising — AI is operational, looking to improve ROI
-
-## Section 3 — Your Goals
-
-**What is the primary business challenge you want AI to solve?**
-- [ ] Reduce operational costs
-- [ ] Automate manual / repetitive workflows
-- [ ] Improve customer experience
-- [ ] Generate better data insights
-- [ ] Accelerate product development
+**Which process takes up the most manual hours in your team?**
+- [ ] Data entry / Copy-pasting between systems
+- [ ] Email triage / Customer support replies
+- [ ] Document processing (invoices, contracts, resumes)
+- [ ] Lead enrichment and outreach
+- [ ] Scheduling and coordination tasks
 - [ ] Other: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
-**What budget range have you allocated for AI initiatives?**
-- [ ] < $10,000
-- [ ] $10,000 – $50,000
-- [ ] $50,000 – $100,000
-- [ ] $100,000+
-- [ ] Not yet budgeted
+**What software/tools does your team use daily? (e.g., Salesforce, Hubspot, Excel, SAP)**
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
-## Section 4 — Grant Awareness
+**How many hours per week does your team spend on these manual workflows?**
+- [ ] < 10 hours
+- [ ] 10-30 hours
+- [ ] 30-80 hours
+- [ ] 80+ hours
 
-**Are you aware of Singapore government grants for AI adoption?**
-- [ ] Yes, we know about PSG / EDG
-- [ ] Aware but haven't applied
-- [ ] No, tell me more
-- [ ] Already received grant funding
+## Section 3 — Goals and Readiness
+
+**What is your primary goal for implementing AI agents?**
+- [ ] Fully automate repetitive tasks (zero human interaction)
+- [ ] Support staff with agentic assistants (human-in-the-loop)
+- [ ] Reduce operational costs and scaling bottlenecks
+- [ ] Unify disconnected SaaS tools through agentic integrations
+
+**Do you have APIs or clean structured data for these processes?**
+- [ ] Yes, we have modern APIs
+- [ ] Partly, we have CSV/Excel exports
+- [ ] No, it's mostly unstructured documents / manual UIs
+- [ ] Not sure
+
+## Section 4 — Singapore Grant Options
+
+**Do you want us to assess your eligibility for government grants (PSG/EDG) to fund up to 50–70% of custom agent development?**
+- [ ] Yes, please evaluate our grant eligibility
+- [ ] Not interested in grants
+- [ ] We are a multinational / non-eligible entity
 
 ---
 
 ## What happens next
 
-1. We review your responses within **24 hours**.
-2. You receive a custom **AI Opportunity Report** with estimated savings and recommended next steps.
-3. If there is a clear fit, we invite you to a **free 30-minute consultation** (no obligation).
+1. We review your processes and workflow bottleneck inputs within **24 hours**.
+2. You receive an **Agentic AI Opportunity Report** detailing suitability, single- vs. multi-agent recommendations, and ROI projections.
+3. If there is a clear fit, you will receive a link to book a **free 30-minute scoping call**.
 
-**[Submit Assessment]**
+**[Submit Audit Request]**
 
 ---
 

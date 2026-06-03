@@ -1,0 +1,17 @@
+{
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "name": "AIMS SG",
+    "url": "https://aims-sg.com",
+    "description": "Agentic AI Business Transformation for Singapore SMEs",
+    "areaServed": {
+        "@type": "Country",
+        "name": "Singapore"
+    },
+    "knowsAbout": [
+        "AI Business Transformation",
+        "AI Consulting",
+        "Singapore PSG Grant",
+        "Singapore EDG Grant"
+    ]
+}

@@ -87,7 +87,7 @@ seq_names=("01-initial" "02-followup-1" "03-followup-2")
 
 # Process each prospect
 total=0
-tail -n +2 "$CSV_FILE" | while IFS=',' read -r -a row; do
+while IFS=',' read -r -a row; do
     first_name=$(echo "${row[$col_fn]}" | xargs)
     email=$(echo "${row[$col_email]}" | xargs)
     last_name=$( [[ $col_ln -ge 0 ]] && echo "${row[$col_ln]}" | xargs || echo "")
@@ -104,7 +104,7 @@ tail -n +2 "$CSV_FILE" | while IFS=',' read -r -a row; do
     prospect_dir="$OUTPUT_DIR/$(echo "$first_name$last_name" | tr -cd 'a-zA-Z0-9')"
     mkdir -p "$prospect_dir"
 
-    subject_line=$(printf "AI opportunities for %s" "$company")
+    subject_line=$(printf "Agentic AI opportunities for %s" "$company")
     
     export FIRST_NAME="$first_name"
     export LAST_NAME="$last_name"
@@ -116,9 +116,9 @@ tail -n +2 "$CSV_FILE" | while IFS=',' read -r -a row; do
     export SUBJECT_LINE="$subject_line"
     export SENDER_NAME="${SENDER:-$COMPANY_NAME Team}"
     export SOURCE_DETAIL="$linkedin"
-    export OPENING_HOOK=$(printf "I noticed %s is in %s and was wondering if AI adoption is on your radar for 2026." "$company" "$industry")
+    export OPENING_HOOK=$(printf "I noticed %s is in %s and was wondering if deploying autonomous AI agents to automate manual processes is on your roadmap for 2026." "$company" "$industry")
     export REFERENCE_INDUSTRY="$industry"
-    export REFERENCE_RESULT="achieved 40% cost savings in 3 months with AI process automation"
+    export REFERENCE_RESULT="deploy a multi-agent system to automate manual operations, cutting processing costs by 45% under the EDG grant"
     export LIMITED_SLOTS="5"
     export INDUSTRY="$industry"
 
@@ -152,8 +152,8 @@ LinkedIn: $linkedin
 Sequence: 3 emails over 2 weeks
 CONTACT
 
-    ((total++))
-done
+    total=$((total + 1))
+done < <(tail -n +2 "$CSV_FILE")
 
 info "Total prospects processed: $total"
 ok "Outreach emails generated in $OUTPUT_DIR/"

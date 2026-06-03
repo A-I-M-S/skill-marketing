@@ -1,4 +1,4 @@
-# Landing Page Sections — AI Business Readiness Assessment
+# Landing Page Sections — Agentic AI Opportunity Audit
 
 Use the GEAF layout (Grabber → Explainer → Anticipate objections → Finish strong).
 
@@ -6,29 +6,29 @@ Use the GEAF layout (Grabber → Explainer → Anticipate objections → Finish 
 
 ## Grabber (Hero — above the fold)
 
-**Headline:** Is Your Business AI-Ready? Get Your Free Readiness Assessment in 2 Minutes.
+**Headline:** Automate Entire Workflows with Autonomous AI Agents. Get Your Free Agentic Opportunity Audit.
 
-**Subheadline:** Discover exactly where AI can save you time, reduce costs, and unlock growth — with a personalised report tailored to your {{PRIMARY_COUNTRY}} business.
+**Subheadline:** Discover which manual processes in your business can be handled 24/7 by custom AI agents. Receive a personalised workflow automation report tailored for your {{PRIMARY_COUNTRY}} enterprise.
 
-**CTA:** [Get My Free Assessment] → (scrolls to form)
+**CTA:** [Get My Free Audit] → (scrolls to form)
 
 ---
 
 ## Explainer (Why this matters)
 
-**Singapore is investing $1B+ into AI.** The National AI Impact Programme targets 10,000 SMEs. Companies that adopt AI early gain a compounding advantage.
+**Singapore is investing $1B+ into AI.** Traditional SaaS and chat interfaces still require manual copy-pasting. **Agentic AI** solves this by deploying digital workers that run entire operations autonomously.
 
 Your free report includes:
-- A readiness score across 5 dimensions (data, process, talent, technology, strategy)
-- Estimated annual savings based on companies like yours
-- A ranked list of quick-win AI opportunities
-- Grant options (PSG / EDG) that could co-fund your implementation
+- An **Agentic Suitability Score** for your primary workflows
+- Estimated token and operational cost savings
+- A recommended architecture (Single-Agent vs. Multi-Agent orchestration)
+- Grant options (PSG / EDG) covering up to 50–70% of implementation costs
 
 ---
 
 ## Social Proof
 
-"{{COMPANY_NAME}} helped us identify automation opportunities we had completely overlooked. The readiness assessment took 5 minutes and saved us months of guesswork."
+"{{COMPANY_NAME}} mapped our invoice matching and inventory replenishment processes, then built custom agents to handle them. The initial audit showed us exactly where agents could step in, saving us 30 hours of work per week."
 
 — *[Name, Title, Company]*
 
@@ -38,18 +38,18 @@ Your free report includes:
 
 | Objection | Response |
 |-----------|----------|
-| "We're too small for AI." | 87% of Singapore SMEs can benefit from AI with tools starting at < $200/month. |
-| "We don't have the technical expertise." | We handle everything from strategy to implementation to training. |
-| "We tried AI before and it didn't work." | Most failures come from poor scoping. Our assessment identifies real, achievable use cases. |
-| "Is this a sales pitch?" | The assessment is genuinely free. We only follow up if there is a clear fit. |
+| "Will AI agents make mistakes or go rogue?" | We build multi-agent workflows with human-in-the-loop gates and prompt-level guardrails. |
+| "We don't have the technical team to manage agents." | We design, implement, monitor, and train your staff to manage the agent fleet. |
+| "Is our data secure?" | We support deployment via private LLM instances or local open-source models (like Llama 3) in Singapore. |
+| "How do we finance this?" | Our solutions are eligible for EDG/PSG grants, covering up to 50-70% of costs for eligible SG companies. |
 
 ---
 
 ## Finish Strong
 
-**Don't leave money on the table.** The PSG grant covers up to 50% of qualifying AI project costs — but you need a clear plan first.
+**Stop paying for manual repetition.** Custom agentic solutions can automate your sales outreach, document verification, and support queues—but you need a roadmap first.
 
-**[Get Your Free Assessment →]**
+**[Get Your Free Agentic Audit →]**
 
 ---
 

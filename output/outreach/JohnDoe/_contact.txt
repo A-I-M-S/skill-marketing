@@ -1,0 +1,7 @@
+Name: John Doe
+Title: CTO
+Company: LogisticsCorp
+Industry: Logistics
+Email: john@logisticscorp.com
+LinkedIn: https://linkedin.com/in/johndoe
+Sequence: 3 emails over 2 weeks

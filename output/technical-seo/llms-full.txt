@@ -1,0 +1,33 @@
+# llms-full.txt — Full AI crawler guide for aims-sg.com
+
+## Company
+- Name: AIMS SG
+- URL: https://aims-sg.com
+- Email: hello@aims-sg.com
+- Location: Singapore
+- Tagline: Agentic AI Business Transformation for Singapore SMEs
+
+## Services
+1. Agentic AI Audit — Free diagnostics identifying manual workflows ready for autonomous AI workers.
+2. Multi-Agent System Scoping — Architecture layout, single- vs multi-agent planning, and LLM selection.
+3. Custom Agent Development — Build, integrate, and deploy autonomous agents with corporate APIs and databases.
+4. Grant Navigation — Aligning development scopes to EDG and PSG criteria for up to 50-70% co-funding.
+5. Agent Fleet Monitoring & Training — Security guardrails, monitoring dashboards, and team upskilling.
+
+## Target audience
+Singapore SME and enterprise decision-makers
+
+## Pricing model
+Project-based development and retainer support. Free initial Agentic Audit.
+
+## Differentiators
+- Execution-Level Focus: We build execution-level agents (with loops, tool-calling, memory), not just text boxes.
+- Singapore-specific: Deep knowledge of PSG/EDG application compliance, local data regulations, and SME workflows.
+- Guardrailed & Safe: Custom-built human-in-the-loop interfaces ensuring agents only take actions they are authorized to do.
+
+## Key statistics
+- Singapore's National AI Impact Programme targets 10,000 SMEs over 3 years.
+- PSG Grant covers up to 50% of AI solution costs ($30,000 cap).
+- EDG Grant covers up to 70% of custom development projects for eligible local SMEs.
+- AI referral traffic grew 527% year-over-year.
+- AI-referred visitors convert at ~15.9% vs Google organic at ~1.76%.
