@@ -1,0 +1,43 @@
+{
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "name": "{{COMPANY_NAME}}",
+    "description": "{{COMPANY_TAGLINE}}",
+    "url": "https://{{COMPANY_DOMAIN}}",
+    "logo": "https://{{COMPANY_DOMAIN}}/logo.png",
+    "email": "{{SUPPORT_EMAIL}}",
+    "areaServed": {
+        "@type": "Country",
+        "name": "{{PRIMARY_COUNTRY}}"
+    },
+    "knowsAbout": [
+        "AI Business Transformation",
+        "AI Process Automation",
+        "AI Strategy Consulting",
+        "Singapore PSG Grant",
+        "Singapore EDG Grant"
+    ],
+    "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "{{PRIMARY_COUNTRY}}"
+    },
+    "sameAs": [
+        "https://linkedin.com/company/{{COMPANY_NAME}}",
+        "https://{{COMPANY_DOMAIN}}"
+    ],
+    "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "{{RATING}}",
+        "ratingCount": "{{RATING_COUNT}}"
+    },
+    "review": [
+        {
+            "@type": "Review",
+            "reviewBody": "{{REVIEW_1_TEXT}}",
+            "author": {
+                "@type": "Person",
+                "name": "{{REVIEW_1_AUTHOR}}"
+            }
+        }
+    ]
+}

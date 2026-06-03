@@ -1,0 +1,19 @@
+{
+    "@context": "https://schema.org",
+    "@type": "QAPage",
+    "mainEntity": {
+        "@type": "Question",
+        "name": "{{QA_QUESTION}}",
+        "text": "{{QA_FULL_QUESTION}}",
+        "answerCount": 1,
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "{{QA_ANSWER}}",
+            "author": {
+                "@type": "Organization",
+                "name": "{{COMPANY_NAME}}",
+                "url": "https://{{COMPANY_DOMAIN}}"
+            }
+        }
+    }
+}

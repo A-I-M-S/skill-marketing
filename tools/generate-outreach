@@ -1,0 +1,160 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$(dirname "$0")")" && pwd)"
+source "$SCRIPT_DIR/lib/helpers.sh"
+
+usage() {
+    cat <<EOF
+USAGE: generate-outreach [OPTIONS] <prospects.csv>
+
+Generate personalised cold email sequences from a CSV of prospects.
+
+CSV FORMAT:
+  first_name,last_name,title,company,industry,email,linkedin_url,notes
+
+OPTIONS:
+  -o, --output DIR    Output directory (default: output/outreach/)
+  -s, --sender NAME   Sender name (default: from .env or "The {{COMPANY_NAME}} Team")
+  -a, --ai            AI-enhance each email (requires AI_ENDPOINT in .env)
+  -h, --help          Show this help
+
+EXAMPLE:
+  generate-outreach prospects.csv -o output/campaign-Q3 -a
+EOF
+    exit 0
+}
+
+CSV_FILE=""
+OUTPUT_DIR="output/outreach"
+SENDER=""
+USE_AI=false
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -o|--output) OUTPUT_DIR="$2"; shift 2 ;;
+        -s|--sender) SENDER="$2"; shift 2 ;;
+        -a|--ai) USE_AI=true; shift ;;
+        -h|--help) usage ;;
+        *) CSV_FILE="$1"; shift ;;
+    esac
+done
+
+if [[ -z "$CSV_FILE" ]]; then
+    err "No CSV file specified."
+    usage
+fi
+
+if [[ ! -f "$CSV_FILE" ]]; then
+    err "CSV not found: $CSV_FILE"
+    exit 1
+fi
+
+load_env
+
+header "Outreach Sequence Generator"
+info "CSV: $CSV_FILE"
+info "Output: $OUTPUT_DIR"
+
+mkdir -p "$OUTPUT_DIR"
+
+# Read CSV header to get column indexes
+IFS=',' read -r -a headers < "$CSV_FILE"
+col_fn=-1 col_ln=-1 col_title=-1 col_co=-1 col_ind=-1 col_email=-1 col_li=-1 col_notes=-1
+
+for i in "${!headers[@]}"; do
+    h=$(echo "${headers[$i]}" | tr '[:upper:]' '[:lower:]' | xargs)
+    case "$h" in
+        first_name) col_fn=$i ;;
+        last_name) col_ln=$i ;;
+        title) col_title=$i ;;
+        company) col_co=$i ;;
+        industry) col_ind=$i ;;
+        email) col_email=$i ;;
+        linkedin_url|linkedin) col_li=$i ;;
+        notes) col_notes=$i ;;
+    esac
+done
+
+if [[ $col_fn -lt 0 || $col_email -lt 0 ]]; then
+    err "CSV must have at least 'first_name' and 'email' columns. Found: ${headers[*]}"
+    exit 1
+fi
+
+# Template paths
+templates=("$SCRIPT_DIR/templates/cold-email/initial-outreach.md" "$SCRIPT_DIR/templates/cold-email/followup-1.md" "$SCRIPT_DIR/templates/cold-email/followup-2.md")
+seq_names=("01-initial" "02-followup-1" "03-followup-2")
+
+# Process each prospect
+total=0
+tail -n +2 "$CSV_FILE" | while IFS=',' read -r -a row; do
+    first_name=$(echo "${row[$col_fn]}" | xargs)
+    email=$(echo "${row[$col_email]}" | xargs)
+    last_name=$( [[ $col_ln -ge 0 ]] && echo "${row[$col_ln]}" | xargs || echo "")
+    company=$( [[ $col_co -ge 0 ]] && echo "${row[$col_co]}" | xargs || echo "your company")
+    industry=$( [[ $col_ind -ge 0 ]] && echo "${row[$col_ind]}" | xargs || echo "the")
+    title=$( [[ $col_title -ge 0 ]] && echo "${row[$col_title]}" | xargs || echo "")
+    linkedin=$( [[ $col_li -ge 0 ]] && echo "${row[$col_li]}" | xargs || echo "")
+    
+    if [[ -z "$first_name" || -z "$email" ]]; then
+        warn "Skipping row with missing name/email: ${row[*]}"
+        continue
+    fi
+
+    prospect_dir="$OUTPUT_DIR/$(echo "$first_name$last_name" | tr -cd 'a-zA-Z0-9')"
+    mkdir -p "$prospect_dir"
+
+    subject_line=$(printf "AI opportunities for %s" "$company")
+    
+    export FIRST_NAME="$first_name"
+    export LAST_NAME="$last_name"
+    export TARGET_COMPANY="$company"
+    export TARGET_INDUSTRY="$industry"
+    export TARGET_PERSONA="$title"
+    export TARGET_EMAIL="$email"
+    export TARGET_LINKEDIN="$linkedin"
+    export SUBJECT_LINE="$subject_line"
+    export SENDER_NAME="${SENDER:-$COMPANY_NAME Team}"
+    export SOURCE_DETAIL="$linkedin"
+    export OPENING_HOOK=$(printf "I noticed %s is in %s and was wondering if AI adoption is on your radar for 2026." "$company" "$industry")
+    export REFERENCE_INDUSTRY="$industry"
+    export REFERENCE_RESULT="achieved 40% cost savings in 3 months with AI process automation"
+    export LIMITED_SLOTS="5"
+    export INDUSTRY="$industry"
+
+    for j in "${!templates[@]}"; do
+        tmpl="${templates[$j]}"
+        seq="${seq_names[$j]}"
+        if [[ -f "$tmpl" ]]; then
+            output_file="$prospect_dir/$seq.md"
+            apply_template "$tmpl" "$output_file"
+            
+            # AI enhancement per email if requested
+            if $USE_AI; then
+                source "$SCRIPT_DIR/lib/ai.sh"
+                enhanced=""
+                ai_instructions=$(printf "Personalise this cold email for %s at %s (%s). Make it specific to their industry and role (%s). Keep it professional and concise." "$first_name" "$company" "$industry" "$title")
+                if ai_enhance "$tmpl" "$ai_instructions" enhanced; then
+                    printf "%s" "$enhanced" > "$output_file"
+                fi
+            fi
+        fi
+    done
+
+    # Create a summary file
+    cat > "$prospect_dir/_contact.txt" <<CONTACT
+Name: $first_name $last_name
+Title: $title
+Company: $company
+Industry: $industry
+Email: $email
+LinkedIn: $linkedin
+Sequence: 3 emails over 2 weeks
+CONTACT
+
+    ((total++))
+done
+
+info "Total prospects processed: $total"
+ok "Outreach emails generated in $OUTPUT_DIR/"
+info "Review each email before sending. Never send automated emails without human review."

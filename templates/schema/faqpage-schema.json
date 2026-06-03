@@ -1,0 +1,30 @@
+{
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+        {
+            "@type": "Question",
+            "name": "{{FAQ_Q1}}",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "{{FAQ_A1}}"
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "{{FAQ_Q2}}",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "{{FAQ_A2}}"
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "{{FAQ_Q3}}",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "{{FAQ_A3}}"
+            }
+        }
+    ]
+}

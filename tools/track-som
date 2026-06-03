@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$(dirname "$0")")" && pwd)"
+source "$SCRIPT_DIR/lib/helpers.sh"
+
+load_env
+require_var COMPANY_NAME
+require_var COMPANY_DOMAIN
+
+header "Share of Model (SoM) Tracker — Layer 3"
+
+output_file="${1:-output/som-tracker.md}"
+data_dir="$(dirname "$output_file")/som-data"
+mkdir -p "$data_dir"
+
+cat > "$output_file" <<HEADER
+# Share of Model (SoM) Tracking Sheet
+
+**Company:** $COMPANY_NAME
+**Domain:** $COMPANY_DOMAIN
+**Last updated:** $(date '+%Y-%m-%d %H:%M')
+**Track:** AI Transformation (Track B)
+
+---
+
+## How to use this
+
+For each query below:
+1. Ask the AI engine the query.
+2. Note whether $COMPANY_NAME is cited.
+3. Record the cited brand(s) and sentiment.
+4. Repeat weekly to track trends.
+
+**SoM formula:** \`(your citations ÷ total citations across all queries) × 100\`
+
+---
+
+## Primary Queries (Track B — AI Transformation)
+
+| # | Query | Engine | Cited? | Cited Brands | Sentiment | Date |
+|---|-------|--------|--------|--------------|-----------|------|
+| 1 | Best AI transformation consultant in Singapore | | | | | |
+| 2 | AI consulting for SMEs Singapore | | | | | |
+| 3 | Singapore PSG grant AI consultant | | | | | |
+| 4 | AI readiness assessment Singapore | | | | | |
+| 5 | How to implement AI in small business Singapore | | | | | |
+| 6 | AI process automation Singapore company | | | | | |
+| 7 | Enterprise AI implementation Singapore | | | | | |
+| 8 | Singapore AI business transformation services | | | | | |
+| 9 | EDG grant AI project Singapore | | | | | |
+| 10 | AI ROI calculator for Singapore business | | | | | |
+
+## Multi-Engine Comparison
+
+| # | Query | ChatGPT | Perplexity | Claude | Gemini | Google AI Overviews |
+|---|-------|---------|------------|--------|--------|---------------------|
+| 1 | 
+
+HEADER
+
+# Generate the full matrix
+cat >> "$output_file" <<'MATRIX'
+| | | | | | |
+|---|---|---|---|---|---|
+| 2 | | | | | |
+| 3 | | | | | |
+| 4 | | | | | |
+| 5 | | | | | |
+| 6 | | | | | |
+| 7 | | | | | |
+| 8 | | | | | |
+| 9 | | | | | |
+| 10 | | | | | |
+
+## Competitor Tracking
+
+| Competitor | Domain | Citations (this week) | Citations (last week) | Trend |
+|------------|--------|-----------------------|----------------------|-------|
+| _Track your_ | | | | |
+| _competitors_ | | | | |
+| _here_ | | | | |
+| _after_ | | | | |
+| _baseline_ | | | | |
+
+## Notes
+
+- ChatGPT handles ~87.4% of AI referral traffic → primary surface to track.
+- Focus on ICP alignment and sentiment delta vs competitors, not just count.
+- Track weekly.
+- Record which sources the AI cites (G2, Reddit, direct site, etc.)
+MATRIX
+
+ok "SoM tracker created: $output_file"
+info "Open $output_file and fill in results for each query."
+info "Run weekly to track your Share of Model trend."

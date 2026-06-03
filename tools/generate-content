@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$(dirname "$0")")" && pwd)"
+source "$SCRIPT_DIR/lib/helpers.sh"
+
+usage() {
+    cat <<EOF
+USAGE: generate-content [OPTIONS] <template_file>
+
+Generate content from templates with optional AI enhancement.
+
+OPTIONS:
+  -o, --output FILE    Write output to FILE instead of stdout
+  -d, --data FILE      Load template variables from a JSON/YAML data file
+  -a, --ai             Enhance generated content using AI (requires AI_ENDPOINT in .env)
+  -p, --prompt TEXT    Custom AI enhancement instructions (default: enhance for clarity and impact)
+  -l, --list           List available templates
+  -h, --help           Show this help
+
+EXAMPLES:
+  generate-content templates/seo/long-tail-post.md -o output/post.md
+  generate-content templates/linkedin/monday-insight.md -a -p "Make it more Singapore-specific"
+  generate-content --list
+
+EOF
+    exit 0
+}
+
+list_templates() {
+    header "Available Templates"
+    find "$SCRIPT_DIR/templates" -name "*.md" -o -name "*.json" | sort | while read -r f; do
+        rel="${f#$SCRIPT_DIR/}"
+        printf "  %s\n" "$rel"
+    done
+    echo ""
+    exit 0
+}
+
+# Parse args
+TEMPLATE=""
+OUTPUT=""
+DATA_FILE=""
+USE_AI=false
+AI_INSTRUCTIONS="Enhance this content for clarity, impact, and Singapore SME relevance. Keep the core message intact but improve the writing."
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -o|--output) OUTPUT="$2"; shift 2 ;;
+        -d|--data) DATA_FILE="$2"; shift 2 ;;
+        -a|--ai) USE_AI=true; shift ;;
+        -p|--prompt) AI_INSTRUCTIONS="$2"; shift 2 ;;
+        -l|--list) list_templates ;;
+        -h|--help) usage ;;
+        *) TEMPLATE="$1"; shift ;;
+    esac
+done
+
+if [[ -z "$TEMPLATE" ]]; then
+    err "No template specified. Use -l to list available templates."
+    usage
+fi
+
+if [[ ! -f "$TEMPLATE" ]]; then
+    err "Template not found: $TEMPLATE"
+    exit 1
+fi
+
+# Load data file if provided
+if [[ -n "$DATA_FILE" ]]; then
+    if [[ ! -f "$DATA_FILE" ]]; then
+        err "Data file not found: $DATA_FILE"
+        exit 1
+    fi
+    info "Loading variables from $DATA_FILE"
+    # Source the data file if it's a shell script, otherwise try to parse
+    if [[ "$DATA_FILE" == *.sh ]]; then
+        source "$DATA_FILE"
+    elif [[ "$DATA_FILE" == *.env ]]; then
+        set -a
+        source "$DATA_FILE"
+        set +a
+    else
+        warn "Data file format not recognised. Expected .sh or .env format."
+    fi
+fi
+
+header "Generating Content"
+info "Template: $TEMPLATE"
+
+# Load .env for {{VARS}}
+load_env
+
+# Apply template
+if [[ -n "$OUTPUT" ]]; then
+    mkdir -p "$(dirname "$OUTPUT")"
+    apply_template "$TEMPLATE" "$OUTPUT"
+else
+    apply_template "$TEMPLATE"
+fi
+
+# AI enhancement
+if $USE_AI; then
+    source "$SCRIPT_DIR/lib/ai.sh"
+    
+    if [[ -n "$OUTPUT" ]]; then
+        # Read generated file, enhance, write back
+        local_content=$(<"$OUTPUT")
+        enhanced=""
+        if ai_enhance "$TEMPLATE" "$AI_INSTRUCTIONS" enhanced; then
+            printf "%s" "$enhanced" > "$OUTPUT"
+            ok "AI-enhanced content written to $OUTPUT"
+        else
+            warn "AI enhancement skipped (check your .env config). Offline output preserved."
+        fi
+    else
+        # Print to stdout, try AI enhancement
+        source "$SCRIPT_DIR/lib/ai.sh"
+        warn "AI enhancement requires -o/--output. Run with -o to save enhanced content."
+    fi
+fi
+
+ok "Done"
