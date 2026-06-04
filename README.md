@@ -17,6 +17,7 @@ skill-marketing/
 ├── tools/                          # Executable automation scripts
 │   ├── generate-content            # Template renderer + optional AI enhance
 │   ├── generate-outreach           # Batch cold email generator from CSV
+│   ├── marketing-daemon            # PM2 background scheduler + combined logging
 │   ├── setup-technical-seo         # robots.txt, llms.txt, schema stub generator
 │   └── track-som                   # Share of Model tracking sheet creator
 ├── templates/                      # Markdown templates with {{VARIABLES}}
@@ -31,6 +32,7 @@ skill-marketing/
 │   ├── week1-sprint.md             # Days 1-7 starting actions
 │   ├── 90-day-roadmap.md           # Full quarter plan (Months 1-3)
 │   ├── monthly-review.md           # Monthly KPI review template
+│   ├── agent-log-review.md         # Agent checklist for daemon/log review
 │   ├── technical-seo.md            # SSR, robots.txt, llms.txt, schema checklist
 │   ├── pr-outreach.md              # Journalists, HARO, press release targets
 │   └── directory-listings.md       # Directory listing priority checklist
@@ -38,7 +40,8 @@ skill-marketing/
 │   ├── keywords-track-b.md         # SEO keywords (Track B — Agentic AI Transformation)
 │   ├── persona-cto.md              # Buyer persona (SME/Enterprise CTOs)
 │   └── grants-reference.md         # Singapore grants (PSG, EDG, SFEC)
-└── logs/                           # Activity logs
+├── ecosystem.config.js             # PM2 process definition
+└── logs/                           # Activity logs (created at runtime)
 ```
 
 ## Quick Start
@@ -63,6 +66,84 @@ cp .env.sample .env
 
 # 6. Track Share of Model (AI discoverability baseline)
 ./tools/track-som
+```
+
+## Background Automation with PM2
+
+The repository includes a safe background marketing daemon that runs under PM2 and generates draft marketing assets on a schedule. It does **not** send emails or publish posts automatically. Generated content and outreach remain human-review only.
+
+### Configure
+
+Set these values in `.env` as needed:
+
+```bash
+MARKETING_DAEMON_INTERVAL_SECONDS=300
+MARKETING_ENV_FILE=.env
+MARKETING_LOG_FILE=logs/marketing-combined.log
+MARKETING_STATUS_FILE=output/status/latest-status.md
+MARKETING_OUTPUT_DIR=output
+MARKETING_STATE_DIR=output/status/daemon-state
+MARKETING_ENABLE_AI=false
+MARKETING_ENABLE_OUTREACH=false
+MARKETING_PROSPECTS_CSV=prospects.csv
+```
+
+Recommended defaults keep AI enhancement and outreach draft generation disabled. Set `MARKETING_ENABLE_AI=true` only after `AI_ENDPOINT`, `AI_API_KEY`, and `AI_MODEL` are configured. Set `MARKETING_ENABLE_OUTREACH=true` only when a reviewed prospects CSV exists.
+
+### Run Once for Testing
+
+```bash
+MARKETING_DAEMON_ONCE=true ./tools/marketing-daemon
+```
+
+This writes to:
+
+- `logs/marketing-combined.log`
+- `output/status/latest-status.md`
+- generated output under `output/`
+
+### Run in the Background with PM2
+
+```bash
+pm2 start ecosystem.config.js
+pm2 status
+pm2 logs skill-marketing
+```
+
+To stop it:
+
+```bash
+pm2 stop skill-marketing
+```
+
+### Default Schedule
+
+| Cadence | Task | Output |
+|---------|------|--------|
+| Every daemon cycle | Health/status check | `output/status/latest-status.md` |
+| Monday | LinkedIn insight draft | `output/posts/YYYY-MM-DD-monday-insight.md` |
+| Monday | Share of Model tracker refresh | `output/som-tracker.md` |
+| Wednesday | LinkedIn tip draft | `output/posts/YYYY-MM-DD-wednesday-tip.md` |
+| Friday | LinkedIn case-study draft | `output/posts/YYYY-MM-DD-friday-case-study.md` |
+| Friday | SEO long-tail draft | `output/seo/YYYY-MM-DD-long-tail-post.md` |
+| First day of month | Monthly review draft | `output/reviews/YYYY-MM-DD-monthly-review.md` |
+| Optional | Outreach drafts if enabled and CSV exists | `output/outreach/YYYY-MM-DD/` |
+
+Each scheduled task runs at most once per day. PM2 keeps the daemon alive; the daemon itself tracks whether a task has already run.
+
+## Agent Log Review
+
+For hybrid monitoring, ask OpenCode/OpenClaw to review:
+
+- `output/status/latest-status.md`
+- `logs/marketing-combined.log`
+- recent files under `output/`
+- `checklists/agent-log-review.md`
+
+Example prompt:
+
+```text
+Review the marketing daemon logs and outputs. Tell me if it is running correctly, what marketing drafts were generated, what needs human review, and what I should do next.
 ```
 
 ## Using with Opencode
@@ -91,6 +172,7 @@ This repository is permanently configured for **Track B — AI/Agentic Transform
 
 - **Bash 4+** — all tools are shell scripts
 - **curl + jq** — for AI endpoint calls (optional, only if using AI enhancement)
+- **PM2** — optional, for background daemon management
 - **AI endpoint** — optional, set via `AI_ENDPOINT` + `AI_API_KEY` in `.env`
 
 Everything else is template-based and works fully offline without API calls.

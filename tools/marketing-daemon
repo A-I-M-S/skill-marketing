@@ -1,0 +1,169 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$(dirname "$0")")" && pwd)"
+cd "$SCRIPT_DIR"
+source "$SCRIPT_DIR/lib/helpers.sh"
+
+load_env
+
+INTERVAL_SECONDS="${MARKETING_DAEMON_INTERVAL_SECONDS:-300}"
+OUTPUT_DIR="${MARKETING_OUTPUT_DIR:-output}"
+STATE_DIR="${MARKETING_STATE_DIR:-output/status/daemon-state}"
+ENABLE_AI="${MARKETING_ENABLE_AI:-false}"
+ENABLE_OUTREACH="${MARKETING_ENABLE_OUTREACH:-false}"
+PROSPECTS_CSV="${MARKETING_PROSPECTS_CSV:-prospects.csv}"
+RUN_ONCE="${MARKETING_DAEMON_ONCE:-false}"
+REQUIRED_CONFIG=(COMPANY_NAME COMPANY_DOMAIN TARGET_AUDIENCE PRIMARY_COUNTRY)
+
+mkdir -p "$(dirname "$MARKETING_LOG_FILE")" "$STATE_DIR" "$OUTPUT_DIR/status"
+
+ai_flag=()
+if [[ "$ENABLE_AI" == "true" ]]; then
+    ai_flag=(-a)
+fi
+
+mark_file() {
+    local name="$1"
+    printf "%s\n" "$(date '+%Y-%m-%d %H:%M:%S')" > "$STATE_DIR/$name"
+}
+
+already_ran_today() {
+    local name="$1"
+    local today
+    today="$(date '+%Y-%m-%d')"
+    [[ -f "$STATE_DIR/$name" ]] && grep -q "^$today" "$STATE_DIR/$name"
+}
+
+run_task() {
+    local task_name="$1"
+    shift
+
+    log_info "TASK_START $task_name command=$*"
+    if "$@" >> "$MARKETING_LOG_FILE" 2>&1; then
+        log_ok "TASK_OK $task_name"
+        return 0
+    fi
+
+    log_error "TASK_FAILED $task_name"
+    return 1
+}
+
+run_once_per_day() {
+    local state_name="$1"
+    local task_name="$2"
+    shift 2
+
+    if already_ran_today "$state_name"; then
+        log_info "TASK_SKIP $task_name reason=already_ran_today"
+        return 0
+    fi
+
+    if run_task "$task_name" "$@"; then
+        mark_file "$state_name"
+    fi
+}
+
+missing_required_config() {
+    local missing=()
+    local var_name
+
+    for var_name in "${REQUIRED_CONFIG[@]}"; do
+        if [[ -z "${!var_name:-}" ]]; then
+            missing+=("$var_name")
+        fi
+    done
+
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        log_warn "CONFIG_MISSING required=${missing[*]} action=skip_marketing_generation"
+        write_status "configuration required" "Missing required configuration: \`${missing[*]}\`. Fill in \`.env\` before scheduled marketing generation runs. The daemon can stay running, but it will only perform health checks until this is fixed."
+        return 0
+    fi
+
+    return 1
+}
+
+write_cycle_status() {
+    local summary_file="$OUTPUT_DIR/status/recent-tasks.txt"
+    mkdir -p "$(dirname "$summary_file")"
+    if [[ -f "$MARKETING_LOG_FILE" ]]; then
+        tail -n 40 "$MARKETING_LOG_FILE" > "$summary_file"
+    else
+        printf "No log entries yet.\n" > "$summary_file"
+    fi
+
+    write_status "running" "Daemon cycle completed. Recent task log is available at \`$summary_file\`. Generated drafts remain human-review only."
+}
+
+run_cycle() {
+    local dow dom date_slug
+    dow="$(date '+%u')"
+    dom="$(date '+%d')"
+    date_slug="$(date '+%Y-%m-%d')"
+
+    log_info "DAEMON_CYCLE_START interval_seconds=$INTERVAL_SECONDS ai=$ENABLE_AI outreach=$ENABLE_OUTREACH"
+
+    run_once_per_day "daily-health" "daily_health" true
+
+    if missing_required_config; then
+        log_info "DAEMON_CYCLE_END status=configuration_required"
+        return 0
+    fi
+
+    case "$dow" in
+        1)
+            run_once_per_day "linkedin-monday" "linkedin_monday" \
+                "$SCRIPT_DIR/tools/generate-content" "$SCRIPT_DIR/templates/linkedin/monday-insight.md" \
+                -o "$OUTPUT_DIR/posts/$date_slug-monday-insight.md" "${ai_flag[@]}"
+            run_once_per_day "weekly-som" "weekly_som" \
+                "$SCRIPT_DIR/tools/track-som" "$OUTPUT_DIR/som-tracker.md"
+            ;;
+        3)
+            run_once_per_day "linkedin-wednesday" "linkedin_wednesday" \
+                "$SCRIPT_DIR/tools/generate-content" "$SCRIPT_DIR/templates/linkedin/wednesday-tip.md" \
+                -o "$OUTPUT_DIR/posts/$date_slug-wednesday-tip.md" "${ai_flag[@]}"
+            ;;
+        5)
+            run_once_per_day "linkedin-friday" "linkedin_friday" \
+                "$SCRIPT_DIR/tools/generate-content" "$SCRIPT_DIR/templates/linkedin/friday-case-study.md" \
+                -o "$OUTPUT_DIR/posts/$date_slug-friday-case-study.md" "${ai_flag[@]}"
+            run_once_per_day "weekly-seo" "weekly_seo_draft" \
+                "$SCRIPT_DIR/tools/generate-content" "$SCRIPT_DIR/templates/seo/long-tail-post.md" \
+                -o "$OUTPUT_DIR/seo/$date_slug-long-tail-post.md" "${ai_flag[@]}"
+            ;;
+    esac
+
+    if [[ "$dom" == "01" ]]; then
+        run_once_per_day "monthly-review" "monthly_review_template" \
+            "$SCRIPT_DIR/tools/generate-content" "$SCRIPT_DIR/checklists/monthly-review.md" \
+            -o "$OUTPUT_DIR/reviews/$date_slug-monthly-review.md"
+    fi
+
+    if [[ "$ENABLE_OUTREACH" == "true" ]]; then
+        if [[ -f "$PROSPECTS_CSV" ]]; then
+            run_once_per_day "outreach-drafts" "outreach_drafts" \
+                "$SCRIPT_DIR/tools/generate-outreach" "$PROSPECTS_CSV" \
+                -o "$OUTPUT_DIR/outreach/$date_slug" "${ai_flag[@]}"
+        else
+            log_warn "TASK_SKIP outreach_drafts reason=prospects_csv_missing csv=$PROSPECTS_CSV"
+        fi
+    else
+        log_info "TASK_SKIP outreach_drafts reason=disabled"
+    fi
+
+    write_cycle_status
+    log_info "DAEMON_CYCLE_END"
+}
+
+log_info "DAEMON_START cwd=$SCRIPT_DIR pid=$$"
+
+while true; do
+    run_cycle || log_error "DAEMON_CYCLE_ERROR"
+
+    if [[ "$RUN_ONCE" == "true" ]]; then
+        log_info "DAEMON_EXIT reason=run_once"
+        exit 0
+    fi
+
+    sleep "$INTERVAL_SECONDS"
+done

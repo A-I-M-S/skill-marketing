@@ -13,6 +13,7 @@ header "Share of Model (SoM) Tracker — Layer 3"
 output_file="${1:-output/som-tracker.md}"
 data_dir="$(dirname "$output_file")/som-data"
 mkdir -p "$data_dir"
+log_info "TASK_START track_som output=$output_file"
 
 cat > "$output_file" <<HEADER
 # Share of Model (SoM) Tracking Sheet
@@ -94,3 +95,4 @@ MATRIX
 ok "SoM tracker created: $output_file"
 info "Open $output_file and fill in results for each query."
 info "Run weekly to track your Share of Model trend."
+log_ok "TASK_OK track_som output=$output_file manual_results_required=true"

@@ -55,6 +55,7 @@ load_env
 header "Outreach Sequence Generator"
 info "CSV: $CSV_FILE"
 info "Output: $OUTPUT_DIR"
+log_info "TASK_START generate_outreach csv=$CSV_FILE output=$OUTPUT_DIR ai=$USE_AI"
 
 mkdir -p "$OUTPUT_DIR"
 
@@ -158,3 +159,4 @@ done < <(tail -n +2 "$CSV_FILE")
 info "Total prospects processed: $total"
 ok "Outreach emails generated in $OUTPUT_DIR/"
 info "Review each email before sending. Never send automated emails without human review."
+log_ok "TASK_OK generate_outreach csv=$CSV_FILE output=$OUTPUT_DIR prospects=$total review_required=true"

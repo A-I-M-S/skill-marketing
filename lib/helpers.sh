@@ -15,9 +15,11 @@ warn()  { printf "${YELLOW}⚠ %s${NC}\n" "$*"; }
 err()   { printf "${RED}✗ %s${NC}\n" "$*"; }
 header(){ printf "\n${CYAN}═══════════════════════════════════════════${NC}\n"; printf "${CYAN}  %s${NC}\n" "$*"; printf "${CYAN}═══════════════════════════════════════════${NC}\n"; }
 
+MARKETING_LOG_FILE="${MARKETING_LOG_FILE:-logs/marketing-combined.log}"
+
 # ── Load .env ────────────────────────────────────
 load_env() {
-    local env_file="${1:-.env}"
+    local env_file="${1:-${MARKETING_ENV_FILE:-.env}}"
     if [[ -f "$env_file" ]]; then
         set -a
         source "$env_file"
@@ -65,8 +67,42 @@ apply_template() {
 
 # ── Log with timestamp ──────────────────────────
 log() {
-    local msg="$1"
-    local logdir="${SKILL_LOG_DIR:-logs}"
-    mkdir -p "$logdir"
-    printf "[%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$msg" >> "$logdir/skill.log"
+    local level="${1:-INFO}"
+    shift || true
+    local msg="$*"
+    mkdir -p "$(dirname "$MARKETING_LOG_FILE")"
+    printf "[%s] [%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$level" "$msg" >> "$MARKETING_LOG_FILE"
+}
+
+log_info() { log "INFO" "$*"; }
+log_ok() { log "OK" "$*"; }
+log_warn() { log "WARN" "$*"; }
+log_error() { log "ERROR" "$*"; }
+
+write_status() {
+    local status_file="${MARKETING_STATUS_FILE:-output/status/latest-status.md}"
+    local status="${1:-unknown}"
+    local summary="${2:-No summary provided.}"
+    mkdir -p "$(dirname "$status_file")"
+    cat > "$status_file" <<STATUS
+# Marketing Automation Status
+
+Last checked: $(date '+%Y-%m-%d %H:%M:%S')
+
+## Process
+Status: $status
+Runner: PM2-compatible Bash daemon
+Combined log: $MARKETING_LOG_FILE
+
+## Summary
+$summary
+
+## Review Required
+- Review all generated content before publishing.
+- Review all outreach drafts before sending.
+- Fill in Share of Model results manually after querying AI engines.
+
+## Agent Review
+Use \`checklists/agent-log-review.md\` with this file and the combined log.
+STATUS
 }

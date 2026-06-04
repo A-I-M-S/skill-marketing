@@ -90,11 +90,13 @@ info "Template: $TEMPLATE"
 
 # Load .env for {{VARS}}
 load_env
+log_info "TASK_START generate_content template=$TEMPLATE output=${OUTPUT:-stdout} ai=$USE_AI"
 
 # Apply template
 if [[ -n "$OUTPUT" ]]; then
     mkdir -p "$(dirname "$OUTPUT")"
     apply_template "$TEMPLATE" "$OUTPUT"
+    log_ok "TASK_OUTPUT generate_content file=$OUTPUT"
 else
     apply_template "$TEMPLATE"
 fi
@@ -107,11 +109,13 @@ if $USE_AI; then
         # Read generated file, enhance, write back
         local_content=$(<"$OUTPUT")
         enhanced=""
-        if ai_enhance "$TEMPLATE" "$AI_INSTRUCTIONS" enhanced; then
+        if ai_chat "You are a marketing content specialist for an AI business transformation consultancy targeting Singapore SMEs and enterprises. Keep the Singapore context front and centre. Reference relevant grants (PSG, EDG, SkillsFuture) where appropriate. Maintain a professional, authoritative tone." "Here is a rendered draft. $AI_INSTRUCTIONS\n\n---\n\n$local_content" enhanced; then
             printf "%s" "$enhanced" > "$OUTPUT"
             ok "AI-enhanced content written to $OUTPUT"
+            log_ok "AI_ENHANCED generate_content file=$OUTPUT"
         else
             warn "AI enhancement skipped (check your .env config). Offline output preserved."
+            log_warn "AI_SKIPPED generate_content file=$OUTPUT"
         fi
     else
         # Print to stdout, try AI enhancement
@@ -121,3 +125,4 @@ if $USE_AI; then
 fi
 
 ok "Done"
+log_ok "TASK_OK generate_content template=$TEMPLATE output=${OUTPUT:-stdout} review_required=true"

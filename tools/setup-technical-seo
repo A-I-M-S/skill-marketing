@@ -8,11 +8,35 @@ load_env
 
 header "Technical SEO Setup — Layer 3 (AI Discoverability)"
 
+usage() {
+    cat <<EOF
+USAGE: setup-technical-seo [OPTIONS]
+
+Generate robots.txt, llms.txt, llms-full.txt, and schema stubs.
+
+OPTIONS:
+  -o, --output DIR    Output directory (default: output/technical-seo)
+  -h, --help          Show this help
+
+EOF
+    exit 0
+}
+
+output_dir="output/technical-seo"
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -o|--output) output_dir="$2"; shift 2 ;;
+        -h|--help) usage ;;
+        *) output_dir="$1"; shift ;;
+    esac
+done
+
 # Ensure we have the domain
 require_var COMPANY_DOMAIN
 
-output_dir="${1:-./output/technical-seo}"
 mkdir -p "$output_dir"
+log_info "TASK_START setup_technical_seo output=$output_dir"
 
 # ── robots.txt ─────────────────────────────────
 cat > "$output_dir/robots.txt" <<ROBOTS
@@ -155,3 +179,4 @@ echo "  2. Place llms.txt at the root (e.g., https://$COMPANY_DOMAIN/llms.txt)"
 echo "  3. Deploy schema JSON-LD on relevant pages"
 echo "  4. Ensure your site uses Server-Side Rendering (SSR) — 69% of AI crawlers cannot run JavaScript"
 echo "  5. Run 'track-som' to measure your AI citation baseline"
+log_ok "TASK_OK setup_technical_seo output=$output_dir review_required=true"
