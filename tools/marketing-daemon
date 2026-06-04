@@ -114,6 +114,7 @@ run_cycle() {
         1)
             run_once_per_day "linkedin-monday" "linkedin_monday" \
                 "$SCRIPT_DIR/tools/generate-content" "$SCRIPT_DIR/templates/linkedin/monday-insight.md" \
+                -d "$SCRIPT_DIR/config/default-campaign.env" \
                 -o "$OUTPUT_DIR/posts/$date_slug-monday-insight.md" "${ai_flag[@]}"
             run_once_per_day "weekly-som" "weekly_som" \
                 "$SCRIPT_DIR/tools/track-som" "$OUTPUT_DIR/som-tracker.md"
@@ -121,14 +122,17 @@ run_cycle() {
         3)
             run_once_per_day "linkedin-wednesday" "linkedin_wednesday" \
                 "$SCRIPT_DIR/tools/generate-content" "$SCRIPT_DIR/templates/linkedin/wednesday-tip.md" \
+                -d "$SCRIPT_DIR/config/default-campaign.env" \
                 -o "$OUTPUT_DIR/posts/$date_slug-wednesday-tip.md" "${ai_flag[@]}"
             ;;
         5)
             run_once_per_day "linkedin-friday" "linkedin_friday" \
                 "$SCRIPT_DIR/tools/generate-content" "$SCRIPT_DIR/templates/linkedin/friday-case-study.md" \
+                -d "$SCRIPT_DIR/config/default-campaign.env" \
                 -o "$OUTPUT_DIR/posts/$date_slug-friday-case-study.md" "${ai_flag[@]}"
             run_once_per_day "weekly-seo" "weekly_seo_draft" \
                 "$SCRIPT_DIR/tools/generate-content" "$SCRIPT_DIR/templates/seo/long-tail-post.md" \
+                -d "$SCRIPT_DIR/config/default-campaign.env" \
                 -o "$OUTPUT_DIR/seo/$date_slug-long-tail-post.md" "${ai_flag[@]}"
             ;;
     esac

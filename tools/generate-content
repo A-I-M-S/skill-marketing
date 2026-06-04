@@ -77,9 +77,7 @@ if [[ -n "$DATA_FILE" ]]; then
     if [[ "$DATA_FILE" == *.sh ]]; then
         source "$DATA_FILE"
     elif [[ "$DATA_FILE" == *.env ]]; then
-        set -a
-        source "$DATA_FILE"
-        set +a
+        load_env "$DATA_FILE"
     else
         warn "Data file format not recognised. Expected .sh or .env format."
     fi
@@ -90,6 +88,10 @@ info "Template: $TEMPLATE"
 
 # Load .env for {{VARS}}
 load_env
+export PUBLISH_DATE="${PUBLISH_DATE:-$(date '+%Y-%m-%d')}"
+if [[ "${CTA_LINK:-}" == "{{CALENDLY_LINK}}" ]]; then
+    export CTA_LINK="${CALENDLY_LINK:-}"
+fi
 log_info "TASK_START generate_content template=$TEMPLATE output=${OUTPUT:-stdout} ai=$USE_AI"
 
 # Apply template

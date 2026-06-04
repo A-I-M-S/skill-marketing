@@ -39,7 +39,8 @@ skill-marketing/
 ├── config/                         # Reference data for content
 │   ├── keywords-track-b.md         # SEO keywords (Track B — Agentic AI Transformation)
 │   ├── persona-cto.md              # Buyer persona (SME/Enterprise CTOs)
-│   └── grants-reference.md         # Singapore grants (PSG, EDG, SFEC)
+│   ├── grants-reference.md         # Singapore grants (PSG, EDG, SFEC)
+│   └── default-campaign.env        # Default scheduled-draft variables
 ├── ecosystem.config.js             # PM2 process definition
 └── logs/                           # Activity logs (created at runtime)
 ```
@@ -129,7 +130,7 @@ pm2 stop skill-marketing
 | First day of month | Monthly review draft | `output/reviews/YYYY-MM-DD-monthly-review.md` |
 | Optional | Outreach drafts if enabled and CSV exists | `output/outreach/YYYY-MM-DD/` |
 
-Each scheduled task runs at most once per day. PM2 keeps the daemon alive; the daemon itself tracks whether a task has already run.
+Each scheduled task runs at most once per day. PM2 keeps the daemon alive; the daemon itself tracks whether a task has already run. Scheduled LinkedIn and SEO drafts use `config/default-campaign.env` for template-specific placeholders, while `.env` supplies your company details.
 
 ## Agent Log Review
 

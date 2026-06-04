@@ -21,9 +21,28 @@ MARKETING_LOG_FILE="${MARKETING_LOG_FILE:-logs/marketing-combined.log}"
 load_env() {
     local env_file="${1:-${MARKETING_ENV_FILE:-.env}}"
     if [[ -f "$env_file" ]]; then
-        set -a
-        source "$env_file"
-        set +a
+        local line key value
+        while IFS= read -r line || [[ -n "$line" ]]; do
+            line="${line%$'\r'}"
+            [[ -z "$line" || "$line" == \#* ]] && continue
+            [[ "$line" != *=* ]] && continue
+
+            key="${line%%=*}"
+            value="${line#*=}"
+
+            if [[ ! "$key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+                warn "Skipping invalid env key: $key"
+                continue
+            fi
+
+            if [[ "${value:0:1}" == '"' && "${value: -1}" == '"' ]]; then
+                value="${value:1:${#value}-2}"
+            elif [[ "${value:0:1}" == "'" && "${value: -1}" == "'" ]]; then
+                value="${value:1:${#value}-2}"
+            fi
+
+            export "$key=$value"
+        done < "$env_file"
         ok "Loaded $env_file"
     else
         warn "No $env_file found. Copy .env.sample to .env and fill in your values."
