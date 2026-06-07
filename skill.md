@@ -1,100 +1,70 @@
 ---
 name: skill-marketing
-description: 3-layer organic growth engine for aims-sg.com (Agentic Business Transformation consultancy targeting Singapore SMEs/enterprises). Builds lead-capture funnels, visibility channels, and AI-discoverability (AEO/GEO) with $0 ad spend.
+description: Automated Lead Generation & Outreach Engine for AIMS. Automatically harvests leads from Apollo, PDL, Snov, Hunter, and Clay, researches recipient websites, synchronizes contacts to Attio CRM, and delivers customized marketing emails via Brevo.
 mode: auto
 ---
 
 # skill-marketing
 
-A **3-layer organic growth engine** for aims-sg.com (Agentic Business Transformation targeting Singapore SMEs and enterprises). Builds and runs the full marketing stack from the plan in `marketing.md` with $0 ad spend.
+The **skill-marketing** engine runs a highly automated, zero-budget outbound marketing stack for **AIMS** (Agentic AI Business Transformation for Singapore SMEs). The engine integrates multiple business lead databases, tracks prospect progress in **Attio CRM**, and leverages an **AI-driven domain research loop** to send highly customized cold emails with a Calendly CTA via **Brevo**.
 
-## Layers
+---
 
-| Layer | Goal | Tools |
-|-------|------|-------|
-| **Layer 1 — Convert** | Lead capture + nurture | Assessment generator, chatbot, 4-email sequence |
-| **Layer 2 — Visibility** | LinkedIn, cold email, SEO, directories, PR, communities | Content generator, outreach tool, checklists |
-| **Layer 3 — Discoverability** | Get cited by AI engines | Technical SEO tools, SoM tracker, answer-first templates |
+## 🛠️ Execution Playbook for the Agent
 
-## Quick Start
+As an autonomous agent, you should follow this execution playbook to run lead generation and outbound tasks for the user.
 
+### 1. Step 1: Ingest Prospects (Harvesting & Imports)
+When the user asks you to "Harvest leads" or "Generate new prospects", call the harvest API crawler:
 ```bash
-# 1. Copy and configure
-cp .env.sample .env
-# Fill in AI_ENDPOINT, AI_API_KEY, AI_MODEL (optional — templates work offline)
-
-# 2. Load the skill in opencode
-# Add to opencode.json:
-# {
-#   "skills": ["file:///path/to/skill-marketing/skill.md"]
-# }
+./tools/run-outbound --harvest 100
 ```
+If the user uploads their own custom CSV list of prospects:
+```bash
+./tools/run-outbound --import /path/to/user_prospects.csv
+```
+This automatically parses their name and email, filters out existing duplicates from `leads.csv` and `contacted.csv`, strictly excludes CTO positions, and appends the new unique leads to `output/leads/leads.csv` (pending pool).
 
-## How the Agent Should Use This Skill
+---
 
-### 1. Understand Context
-- Read `marketing.md` for the full strategy
-- Check `config/` for keywords, personas, and grant reference material
-- Know the user's track is **Track B — AI Transformation** (Singapore SME/enterprise)
+### 2. Step 2: Run a Safe Test Campaign (Testing)
+Before running a live campaign, always recommend running a test redirect to verify the personalization quality:
+```bash
+./tools/run-outbound --count 1 --test your-test-email@domain.com
+```
+This will:
+1. Pull the top lead from `output/leads/leads.csv`.
+2. Perform domain trade-level research.
+3. Call the LLM to write a hyper-personalized email featuring the Calendly CTA.
+4. Sync the contact to Attio CRM.
+5. Deliver the customized email *only* to the specified test email address.
+6. Archive the lead to `output/leads/contacted.csv`.
 
-### 2. Execute the Roadmap
-Follow the 90-day arc from `checklists/90-day-roadmap.md`:
+---
 
-**Month 1 — Foundation:**
-1. Run `tools/generate-content templates/lead-assessment/landing-page-sections.md -o output/landing-page.md`
-2. Run `tools/generate-content templates/lead-assessment/form-template.md -o output/assessment-form.md`
-3. Generate nurture emails: run once per template in `templates/nurture/`
-4. Run `tools/setup-technical-seo -o output/technical-seo`
-5. Run `tools/track-som` for baseline
+### 3. Step 2: Dry-Run Draft Mode (Local Review)
+Compile personalized pitches for your pending prospects list and save them locally without sending emails or updating lists:
+```bash
+./tools/run-outbound --count 20 --draft-only
+```
+Generated content is saved directly to `output/leads/drafts_today.json` for human review.
 
-**Month 2 — Acceleration:**
-1. Generate first month of LinkedIn posts from `templates/linkedin/`
-2. Prepare prospect CSV → `tools/generate-outreach prospects.csv`
-3. Walk user through directory listings (`checklists/directory-listings.md` + templates)
-4. Create SEO blog posts from `templates/seo/long-tail-post.md`
+---
 
-**Month 3 — Maturation:**
-1. Rewrite top pages with answer-first blocks (`templates/seo/answer-block.md`)
-2. Deploy schema JSON-LD (`templates/schema/`)
-3. Track SoM weekly, report trends
-4. Review monthly with `checklists/monthly-review.md`
+### 4. Step 2: Executing Live Deliveries (Live Campaign)
+Once the user is ready to start live outreach, trigger the delivery cycle:
+```bash
+./tools/run-outbound --count 200 --send
+```
+This will execute actual live email deliveries to prospects via Brevo SMTP, synchronize contacts directly into **Attio CRM** with status set to `"contacted"`, and move processed prospects from `leads.csv` to `contacted.csv`.
 
-### 3. Content Generation Flow
-- **Without AI:** Templates render directly with `{{VARS}}` from `.env` — useful standalone
-- **With AI:** Add `-a` flag to `tools/generate-content` to enhance via your endpoint
-- **Custom prompts:** Use `-p "make this more specific to retail SMEs"`
+---
 
-### 4. Available Tools
+## ⚙️ Configuration Variables (.env)
 
-| Tool | What it does |
-|------|-------------|
-| `tools/generate-content` | Fill templates + optional AI enhancement |
-| `tools/generate-outreach` | Batch-generate personalised cold emails from CSV |
-| `tools/setup-technical-seo` | Generate robots.txt, llms.txt, schema stubs |
-| `tools/track-som` | Create Share of Model tracking sheet |
-
-### 5. Reference Files
-
-- `marketing.md` — Full strategy document (authoritative reference)
-- `config/keywords-track-b.md` — SEO keywords Track B
-- `config/persona-cto.md` — Buyer persona
-- `config/grants-reference.md` — Singapore grants for content hooks
-- `.env.sample` — Configurable variables
-
-## Template Variables
-
-All `{{VARS}}` in templates are replaced from:
-1. `.env` file values
-2. Environment variables
-3. Data file passed via `-d` flag
-
-Key variables to set: `COMPANY_NAME`, `COMPANY_DOMAIN`, `PRIMARY_COUNTRY`, `TARGET_AUDIENCE`, `SUPPORT_EMAIL`, `CALENDLY_LINK`
-
-## Rules for the Agent
-
-1. Always reference `marketing.md` for strategic context before executing.
-2. Never send automated content without human review — all outreach is "draft for human review."
-3. Use templates as the default path; AI enhancement is optional (`-a` flag).
-4. Log all generated content and activity to the `logs/` directory.
-5. Run `tools/track-som` at least once per week from week 4 onwards.
-6. When user asks "what should I do next", reference `checklists/90-day-roadmap.md` and their current week.
+The tool reads its credentials directly from `.env`:
+*   `APOLLO_API_KEY`, `HUNTER_API_KEY`, `PDL_API_KEY`, `SNOV_ID`, `SNOV_API_KEY`, `CLAY_API_KEY` (Lead Generation)
+*   `BREVO_API_KEY`, `BREVO_SENDER` (Delivery)
+*   `ATTIO_API_KEY` (CRM Tracking)
+*   `CALENDLY_URL` (Call-To-Action Booking Link)
+*   `AI_ENDPOINT`, `AI_API_KEY`, `AI_MODEL` (Personalization AI)
