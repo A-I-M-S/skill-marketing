@@ -40,6 +40,11 @@ BREVO_SENDER = os.getenv("BREVO_SENDER", "lily@aims-sg.com")
 ATTIO_API_KEY = os.getenv("ATTIO_API_KEY", "")
 CALENDLY_URL = os.getenv("CALENDLY_URL", "https://calendly.com/acwl/ac")
 
+JINA_API_KEY = os.getenv("JINA_API_KEY", "").strip()
+DD_API_KEY = os.getenv("DD_API_KEY", "").strip()
+DD_APP_KEY = os.getenv("DD_APP_KEY", "").strip()
+DD_WORKFLOW_URL = os.getenv("DD_WORKFLOW_URL", "https://api.ap1.datadoghq.com/api/v2/workflows/6a0ca626-ec6b-4d1b-8247-1a95264b718c/instances").strip()
+
 AI_ENDPOINT = os.getenv("AI_ENDPOINT", "https://api.openai.com/v1/chat/completions")
 AI_API_KEY = os.getenv("AI_API_KEY", "")
 AI_MODEL = os.getenv("AI_MODEL", "gpt-4o")
@@ -434,37 +439,308 @@ def generate_new_leads(target_count=200):
     return total_added
 
 # --- AI Domain Research and Personalizer ---
-def extract_domain_trade(domain):
-    """Pings the homepage or uses LLM to identify the company's business model."""
-    if not domain:
-        return "General Business"
+# --- AI Domain Research and Personalizer ---
 
-    log_msg("INFO", f"Researching trade category for website: {domain}...")
+PUBLIC_DOMAINS = {
+    "gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "aol.com", 
+    "icloud.com", "protonmail.com", "proton.me", "zoho.com", "mail.com", 
+    "gmx.com", "yandex.com", "live.com", "msn.com", "qq.com", "163.com",
+    "rediffmail.com", "fastmail.com", "hushmail.com"
+}
+
+def is_public_domain(domain):
+    if not domain:
+        return True
+    return domain.strip().lower() in PUBLIC_DOMAINS
+
+def search_duckduckgo_domain(query):
+    log_msg("INFO", f"Searching DuckDuckGo for: '{query}'...")
+    import urllib.parse
+    import re
+    import ssl
+    url = "https://html.duckduckgo.com/html/?" + urllib.parse.urlencode({"q": query, "kl": "sg-en"})
+    req = urllib.request.Request(
+        url, 
+        headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
+    )
     try:
-        url = f"http://{domain}"
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=4) as conn:
-            html = conn.read().decode("utf-8", errors="ignore")
-            title_start = html.find("<title>")
-            title = ""
-            if title_start != -1:
-                title_end = html.find("</title>", title_start)
-                title = html[title_start + 7:title_end].strip()
-            
-            desc_start = html.find('name="description" content="')
-            desc = ""
-            if desc_start != -1:
-                desc_end = html.find('"', desc_start + 28)
-                desc = html[desc_start + 28:desc_end].strip()
-                
-            summary = f"Title: {title}. Desc: {desc}"
-            if len(summary) > 20:
-                log_msg("OK", f"Scraped site header: {summary[:100]}...")
-                return summary[:500]
-    except Exception:
-        pass
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
         
-    return "Domain lookup timed out or restricted. Fallback to generic sector matching."
+        with urllib.request.urlopen(req, timeout=10, context=ctx) as response:
+            html = response.read().decode("utf-8", errors="ignore")
+            links = re.findall(r'href="([^"]+)"', html)
+            for link in links:
+                if "/l/?uddg=" in link or "uddg=" in link:
+                    parsed = urllib.parse.urlparse(link)
+                    qs = urllib.parse.parse_qs(parsed.query)
+                    if "uddg" in qs:
+                        link = qs["uddg"][0]
+                
+                if "duckduckgo.com" in link or "yandex.com" in link or link.startswith("/"):
+                    continue
+                if link.startswith("http://") or link.startswith("https://"):
+                    domain = link.replace("http://", "").replace("https://", "").replace("www.", "").split("/")[0]
+                    log_msg("OK", f"Found company domain from search: {domain}")
+                    return domain
+    except Exception as e:
+        log_msg("ERROR", f"Error during search: {str(e)}")
+    return None
+
+def fetch_jina_content(domain):
+    log_msg("INFO", f"Fetching webpage markdown via Jina Reader for: {domain}...")
+    import ssl
+    url = f"https://r.jina.ai/{domain}"
+    headers = {"User-Agent": "Mozilla/5.0"}
+    if JINA_API_KEY:
+        headers["Authorization"] = f"Bearer {JINA_API_KEY}"
+    req = urllib.request.Request(
+        url,
+        headers=headers
+    )
+    try:
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        
+        with urllib.request.urlopen(req, timeout=10, context=ctx) as response:
+            markdown = response.read().decode("utf-8", errors="ignore")
+            log_msg("OK", f"Successfully fetched markdown from Jina ({len(markdown)} characters).")
+            return markdown
+    except Exception as e:
+        log_msg("ERROR", f"Failed to fetch content from Jina Reader: {str(e)}")
+        return None
+
+def summarize_jina_content(domain, markdown):
+    if not markdown:
+        return ""
+        
+    if AI_API_KEY:
+        log_msg("INFO", f"Using AI model to write a targeted summary of {domain}...")
+        payload = {
+            "model": AI_MODEL,
+            "messages": [
+                {"role": "system", "content": "You are a professional assistant that summarizes company websites for business-to-business sales personalization."},
+                {"role": "user", "content": f"Based on the following webpage markdown for {domain}, write a concise, professional 2-sentence summary of what this company does, their primary services/products, and target audience.\n\nMarkdown Content:\n{markdown[:4000]}"}
+            ],
+            "temperature": 0.5,
+            "max_tokens": 150
+        }
+        headers = {
+            "Authorization": f"Bearer {AI_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        status, body = make_request(AI_ENDPOINT, "POST", headers, payload)
+        if status == 200:
+            try:
+                data = json.loads(body)
+                summary = data["choices"][0]["message"]["content"].strip()
+                log_msg("OK", f"AI Summary: {summary[:100]}...")
+                return summary
+            except Exception as e:
+                log_msg("ERROR", f"Failed to parse AI summary response: {str(e)}")
+                
+    # Fallback to local regex-based title and meta description scraping or first paragraph
+    log_msg("INFO", f"Falling back to local header and snippet scraper for {domain}...")
+    try:
+        title = ""
+        lines = markdown.split("\n")
+        for line in lines:
+            if line.startswith("Title:"):
+                title = line.replace("Title:", "").strip()
+                break
+        if not title:
+            for line in lines:
+                if line.startswith("# "):
+                    title = line.replace("# ", "").strip()
+                    break
+        
+        clean_snippets = []
+        for line in lines:
+            line_str = line.strip()
+            if not line_str or line_str.startswith("![") or line_str.startswith("[") or line_str.startswith("*") or line_str.startswith("URL Source:") or line_str.startswith("Markdown Content:"):
+                continue
+            if len(line_str) > 30 and not line_str.startswith("http"):
+                clean_snippets.append(line_str)
+                if len(clean_snippets) >= 3:
+                    break
+                    
+        desc = " ".join(clean_snippets)[:300]
+        summary = f"Title: {title}. Description: {desc}"
+        log_msg("OK", f"Fallback Summary: {summary[:100]}...")
+        return summary
+    except Exception as e:
+        log_msg("ERROR", f"Local parser summary fallback failed: {str(e)}")
+        
+    return f"Company operating on domain {domain}."
+
+def research_lead_domain(lead):
+    email = lead.get("email", "").strip()
+    domain = lead.get("domain", "").strip()
+    company = lead.get("company", "").strip()
+    
+    if not domain and "@" in email:
+        domain = email.split("@")[1].strip()
+        
+    if not domain:
+        log_msg("WARN", "No domain could be found or parsed for lead. Skipping research.")
+        return ""
+        
+    if is_public_domain(domain):
+        log_msg("INFO", f"Domain '{domain}' is identified as a public/free email domain.")
+        if company:
+            searched_domain = search_duckduckgo_domain(f"{company} Singapore website")
+            if searched_domain:
+                log_msg("OK", f"Resolved company '{company}' to domain: {searched_domain}")
+                markdown = fetch_jina_content(searched_domain)
+                return summarize_jina_content(searched_domain, markdown)
+            else:
+                log_msg("WARN", f"Could not find or resolve a valid domain for company '{company}' in SERPs.")
+                return ""
+        else:
+            log_msg("INFO", "Public domain with no company name provided. Leaving summary empty.")
+            return ""
+    else:
+        markdown = fetch_jina_content(domain)
+        return summarize_jina_content(domain, markdown)
+
+def extract_email_pitch_from_output(output):
+    """Recursively scans the output dictionary for subject and body/content."""
+    subject = ""
+    body = ""
+    
+    if isinstance(output, dict):
+        for k, v in output.items():
+            if not isinstance(v, (dict, list)):
+                k_lower = k.lower()
+                if "subject" in k_lower:
+                    subject = str(v).strip()
+                elif any(word in k_lower for word in ["body", "content", "text", "pitch", "payload", "html"]):
+                    body = str(v).strip()
+                    
+        if not subject or not body:
+            for k, v in output.items():
+                if isinstance(v, dict):
+                    sub_subj, sub_body = extract_email_pitch_from_output(v)
+                    if sub_subj:
+                        subject = sub_subj
+                    if sub_body:
+                        body = sub_body
+                elif isinstance(v, list):
+                    for item in v:
+                        if isinstance(item, dict):
+                            sub_subj, sub_body = extract_email_pitch_from_output(item)
+                            if sub_subj:
+                                subject = sub_subj
+                            if sub_body:
+                                body = sub_body
+                                
+    return subject, body
+
+def generate_custom_api_pitch(lead, domain_summary):
+    if not DD_API_KEY or not DD_APP_KEY or not DD_WORKFLOW_URL:
+        log_msg("WARN", "Datadog Workflow environment keys are not configured. Skipping custom API pitch.")
+        return None
+        
+    headers = {
+        "Content-Type": "application/json",
+        "DD-API-KEY": DD_API_KEY,
+        "DD-APPLICATION-KEY": DD_APP_KEY
+    }
+    
+    payload = {
+        "meta": {
+            "payload": {
+                "email": lead["email"],
+                "name": f"{lead['first_name']} {lead['last_name']}".strip(),
+                "company_summary": domain_summary or "No summary available"
+            }
+        }
+    }
+    
+    log_msg("INFO", f"Triggering Datadog Workflow API at {DD_WORKFLOW_URL}...")
+    status, body = make_request(DD_WORKFLOW_URL, "POST", headers, payload)
+    
+    if status == 403:
+        if "APP_KEY_NOT_ALLOWED" in body or "actions API access" in body:
+            log_msg("ERROR", "Datadog Application Key lacks Actions API access scope. Please enable 'Actions API access' and the 'workflows_run' scope on your App Key in Datadog Settings.")
+        else:
+            log_msg("ERROR", f"Datadog authentication failed (HTTP 403). Ensure keys and regional endpoint subdomains are valid.")
+        return None
+        
+    if status not in [200, 201]:
+        if "WORKFLOW_INACTIVE" in body:
+            log_msg("ERROR", "Datadog Workflow is currently inactive (not published). Please open your Datadog Console, find workflow '6a0ca626-ec6b-4d1b-8247-1a95264b718c', and click 'Publish' (toggle to active) to allow executions.")
+        else:
+            log_msg("ERROR", f"Datadog Workflow triggering failed (HTTP {status}): {body[:300]}")
+        return None
+        
+    try:
+        data = json.loads(body)
+        instance_id = ""
+        if isinstance(data, dict):
+            data_obj = data.get("data", {})
+            if isinstance(data_obj, dict):
+                instance_id = data_obj.get("id", "") or data_obj.get("attributes", {}).get("id", "")
+                
+        if not instance_id:
+            log_msg("ERROR", f"Failed to extract workflow instance ID from trigger response: {body[:300]}")
+            return None
+            
+        log_msg("OK", f"Successfully triggered Datadog Workflow. Instance ID: {instance_id}")
+        
+        # Poll the instance status up to 90 times (every 2.0 seconds)
+        base_url = DD_WORKFLOW_URL.rstrip("/")
+        poll_url = f"{base_url}/{instance_id}"
+        
+        log_msg("INFO", f"Polling Datadog Workflow status from {poll_url}...")
+        for attempt in range(1, 91):
+            time.sleep(2.0)
+            p_status, p_body = make_request(poll_url, "GET", headers)
+            
+            if p_status != 200:
+                log_msg("WARN", f"Polling attempt {attempt}/90 failed (HTTP {p_status}): {p_body[:200]}")
+                continue
+                
+            try:
+                poll_data = json.loads(p_body)
+                attributes = poll_data.get("data", {}).get("attributes", {})
+                
+                # Check status in both actual AP1 API format and standard docs format
+                w_status = ""
+                instance_status_obj = attributes.get("instanceStatus", {})
+                if isinstance(instance_status_obj, dict):
+                    w_status = instance_status_obj.get("detailsKind", "").lower()
+                if not w_status:
+                    w_status = attributes.get("status", "").lower()
+                
+                log_msg("INFO", f"Polling attempt {attempt}/90 - Workflow status: '{w_status}'")
+                
+                if w_status in ["succeeded", "success"]:
+                    log_msg("OK", "Workflow execution succeeded! Parsing outputs...")
+                    output = attributes.get("outputs", {}) or attributes.get("output", {})
+                    subject, email_body = extract_email_pitch_from_output(output)
+                    
+                    if subject and email_body:
+                        log_msg("OK", "Successfully extracted subject and body from Datadog Workflow output!")
+                        return {"subject": subject, "body": email_body}
+                    else:
+                        log_msg("WARN", f"Workflow succeeded but could not extract email content from output: {json.dumps(output)[:300]}")
+                        break
+                        
+                elif w_status in ["failed", "cancelled", "error", "canceled"]:
+                    log_msg("ERROR", f"Workflow execution halted with terminal status: '{w_status}'")
+                    break
+                    
+            except Exception as pe:
+                log_msg("ERROR", f"Error during polling response parsing: {str(pe)}")
+                
+        log_msg("WARN", "Polling timed out or workflow failed. Falling back to default personalization.")
+    except Exception as e:
+        log_msg("ERROR", f"Failed to process Datadog trigger response: {str(e)}")
+        
+    return None
 
 def generate_personalized_pitch(lead, trade_info):
     """Calls OpenAI-compatible LLM to write a targeted B2B pitch."""
@@ -623,22 +899,27 @@ def execute_outbound_cycle(count=200, mode="draft-only", test_address=None):
         log_msg("INFO", f"--------------------------------------------------")
         log_msg("INFO", f"Processing Prospect: {lead['first_name']} {lead['last_name']} ({lead['email']})")
 
-        # 1. Trade Research
-        trade_info = extract_domain_trade(lead["domain"])
+        # 1. Trade Research (Smart Domain Resolution + Jina Summary)
+        trade_info = research_lead_domain(lead)
 
-        # 2. Personalized AI Pitch
-        raw_pitch = generate_personalized_pitch(lead, trade_info)
-        
-        # Parse subject and body from AI output
+        # 2. Personalized Pitch Selection (Custom API or LLM/Static Fallback)
         subject = f"AI Agent Transformation for {lead['company']}"
-        body = raw_pitch
-        if "Subject:" in raw_pitch:
-            lines = raw_pitch.split("\n")
-            for l in lines:
-                if l.startswith("Subject:"):
-                    subject = l.replace("Subject:", "").strip()
-                    body = raw_pitch.replace(l, "").strip()
-                    break
+        body = ""
+        
+        custom_pitch = generate_custom_api_pitch(lead, trade_info)
+        if custom_pitch:
+            subject = custom_pitch["subject"]
+            body = custom_pitch["body"]
+        else:
+            raw_pitch = generate_personalized_pitch(lead, trade_info)
+            body = raw_pitch
+            if "Subject:" in raw_pitch:
+                lines = raw_pitch.split("\n")
+                for l in lines:
+                    if l.startswith("Subject:"):
+                        subject = l.replace("Subject:", "").strip()
+                        body = raw_pitch.replace(l, "").strip()
+                        break
 
         drafts.append({
             "email": lead["email"],
